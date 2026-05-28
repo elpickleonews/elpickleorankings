@@ -12,7 +12,7 @@ import Footer from '@/components/Footer'
 const getCachedRankings = unstable_cache(
   async () => getRankings(),
   ['rankings'],
-  { revalidate: 604800 },
+  { revalidate: 604800, tags: ['rankings'] },
 )
 
 function getLastUpdated(rankings: AllRankings): string | null {

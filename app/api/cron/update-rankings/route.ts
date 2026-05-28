@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { scrapeAllRankings, mergeRankings } from '@/lib/scraper'
 import { getRankings, setRankings } from '@/lib/data-store'
 
@@ -20,8 +20,7 @@ export async function GET(req: NextRequest) {
     const merged = mergeRankings(existing, fresh)
     await setRankings(merged)
 
-    // Invalidate the cached rankings so the page re-fetches on next request
-    revalidatePath('/')
+    revalidateTag('rankings')
 
     const continentalCount = Object.values(merged.dupr.continental ?? {}).reduce(
       (acc, cats) => acc + Object.keys(cats ?? {}).length,
