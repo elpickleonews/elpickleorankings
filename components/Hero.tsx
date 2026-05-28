@@ -49,14 +49,6 @@ export default function Hero({ lastUpdated, leadPlayer }: HeroProps) {
             Los nombres que mandan en DUPR y PPA, actualizados cada semana.
           </p>
         )}
-        {dateText && (
-          <p
-            className="text-[#9CA3AF] text-xs font-medium uppercase tracking-wide"
-            style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}
-          >
-            Última actualización: {dateText}
-          </p>
-        )}
       </div>
     </section>
   )
