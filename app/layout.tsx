@@ -15,7 +15,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://elpickleo.com'),
+  metadataBase: new URL('https://rankings.elpickleo.com'),
   title: 'Rankings de pickleball – DUPR y PPA | El Pickleo',
   description:
     'Los rankings actualizados de pickleball en español. Consulta el top de jugadores DUPR por continente y país, y el circuito profesional PPA. Actualización semanal.',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     title: 'Rankings de pickleball – DUPR y PPA | El Pickleo',
     description:
       'Los rankings actualizados de pickleball en español. DUPR por continente y país. PPA Tour por categoría.',
-    url: 'https://elpickleo.com/rankings',
+    url: 'https://rankings.elpickleo.com/',
     siteName: 'El Pickleo',
     locale: 'es_MX',
     type: 'website',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://elpickleo.com/rankings',
+    canonical: 'https://rankings.elpickleo.com/',
   },
 }
 

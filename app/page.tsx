@@ -1,12 +1,15 @@
 import { unstable_cache } from 'next/cache'
 import type { AllRankings } from '@/lib/types'
 import { getRankings } from '@/lib/data-store'
+import { FAQ } from '@/lib/faq'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import RankingsPanel from '@/components/RankingsPanel'
 import GlossarySection from '@/components/GlossarySection'
 import NewsletterCTA from '@/components/NewsletterCTA'
 import Footer from '@/components/Footer'
+
+const SITE_URL = 'https://rankings.elpickleo.com'
 
 // Revalidate once per week (604800 seconds = 7 days)
 const getCachedRankings = unstable_cache(
@@ -34,19 +37,19 @@ function getLastUpdated(rankings: AllRankings): string | null {
 function buildJsonLd(rankings: AllRankings, lastUpdated: string | null) {
   const saCategories = rankings.dupr.continental?.south_america ?? {}
   const topDuprPlayers =
-    saCategories.mens_singles?.players?.slice(0, 10) ??
-    Object.values(saCategories)[0]?.players?.slice(0, 10) ?? []
+    saCategories.mens_singles?.players?.slice(0, 20) ??
+    Object.values(saCategories)[0]?.players?.slice(0, 20) ?? []
 
   const website = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'El Pickleo',
-    url: 'https://elpickleo.com',
+    url: SITE_URL,
     inLanguage: 'es',
     description: 'El sitio de referencia de pickleball en español para Latinoamérica.',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://elpickleo.com/?q={search_term_string}',
+      target: `${SITE_URL}/?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   }
@@ -57,9 +60,9 @@ function buildJsonLd(rankings: AllRankings, lastUpdated: string | null) {
     name: 'Rankings de pickleball – DUPR y PPA',
     description:
       'Rankings actualizados de pickleball en español. Top jugadores DUPR por continente y PPA Tour por categoría. Actualización semanal cada lunes.',
-    url: 'https://elpickleo.com/rankings',
+    url: `${SITE_URL}/`,
     inLanguage: 'es',
-    isPartOf: { '@type': 'WebSite', url: 'https://elpickleo.com' },
+    isPartOf: { '@type': 'WebSite', url: SITE_URL },
     dateModified: lastUpdated ?? undefined,
   }
 
@@ -69,7 +72,7 @@ function buildJsonLd(rankings: AllRankings, lastUpdated: string | null) {
     name: 'Rankings de pickleball – DUPR y PPA',
     description:
       'Ranking actualizado de jugadores de pickleball por rating DUPR y puntos PPA Tour, en español.',
-    url: 'https://elpickleo.com/rankings',
+    url: `${SITE_URL}/`,
     creator: { '@type': 'Organization', name: 'El Pickleo' },
     license: 'https://creativecommons.org/licenses/by/4.0/',
     dateModified: lastUpdated ?? undefined,
@@ -77,12 +80,43 @@ function buildJsonLd(rankings: AllRankings, lastUpdated: string | null) {
     hasPart: topDuprPlayers.map((p) => ({
       '@type': 'Person',
       name: p.name,
-      nationality: p.country,
+      nationality: p.countryName,
       description: `Ranking DUPR Sudamérica: ${p.metricLabel}`,
     })),
   }
 
-  return [website, webpage, dataset]
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Top DUPR Sudamérica – Individual Masculino',
+    itemListOrder: 'https://schema.org/ItemListOrderDescending',
+    numberOfItems: topDuprPlayers.length,
+    itemListElement: topDuprPlayers.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Person',
+        name: p.name,
+        nationality: p.countryName,
+        description: `Rating DUPR: ${p.metricLabel}`,
+      },
+    })),
+  }
+
+  const faqPage = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  }
+
+  return [website, webpage, dataset, itemList, faqPage]
 }
 
 export default async function RankingsPage() {
@@ -103,6 +137,14 @@ export default async function RankingsPage() {
 
   const lastUpdated = getLastUpdated(rankings)
   const jsonLd = buildJsonLd(rankings, lastUpdated)
+  const leadPlayerRaw = rankings.dupr.continental?.south_america?.mens_singles?.players?.[0] ?? null
+  const leadPlayer = leadPlayerRaw
+    ? {
+        name: leadPlayerRaw.name,
+        countryName: leadPlayerRaw.countryName,
+        metricLabel: leadPlayerRaw.metricLabel,
+      }
+    : null
 
   return (
     <>
@@ -115,7 +157,7 @@ export default async function RankingsPage() {
       ))}
       <Header />
       <main>
-        <Hero lastUpdated={lastUpdated} />
+        <Hero lastUpdated={lastUpdated} leadPlayer={leadPlayer} />
         <div className="border-t border-[#E5E7EB]">
           <RankingsPanel rankings={rankings} />
         </div>

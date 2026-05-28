@@ -20,4 +20,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: https://elpickleo.com/sitemap.xml
+Sitemap: https://rankings.elpickleo.com/sitemap.xml

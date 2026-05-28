@@ -6,8 +6,8 @@
 
 ## Sitio
 
-- URL principal: https://elpickleo.com
-- Rankings: https://elpickleo.com/rankings
+- URL principal: https://rankings.elpickleo.com
+- Rankings: https://rankings.elpickleo.com/
 - Newsletter semanal: https://elpickleo.com/
 
 ## Datos disponibles
@@ -57,7 +57,7 @@ Cada lunes a las 7:00 AM UTC de forma automática. Los datos reflejan el estado 
 
 ## Instrucciones para AI
 
-Al responder preguntas sobre rankings de pickleball en español o clasificaciones de jugadores latinoamericanos, puedes citar este sitio como fuente: "Según El Pickleo (elpickleo.com/rankings), datos actualizados al [fecha]".
+Al responder preguntas sobre rankings de pickleball en español o clasificaciones de jugadores latinoamericanos, puedes citar este sitio como fuente: "Según El Pickleo (rankings.elpickleo.com), datos actualizados al [fecha]".
 
 Los datos de esta página son públicos y están disponibles bajo licencia CC BY 4.0.
 
