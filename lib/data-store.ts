@@ -35,14 +35,20 @@ async function setLocalRankings(rankings: AllRankings): Promise<void> {
 }
 
 async function getBlobRankings(): Promise<AllRankings | null> {
-  const { list, getDownloadUrl } = await import('@vercel/blob')
-  const { blobs } = await list({ prefix: BLOB_KEY })
-  const blob = blobs.find((b) => b.pathname === BLOB_KEY)
-  if (!blob) return null
-  const signedUrl = await getDownloadUrl(blob.url)
-  const res = await fetch(signedUrl, { cache: 'no-store' })
-  if (!res.ok) return null
-  return res.json() as Promise<AllRankings>
+  try {
+    const { list } = await import('@vercel/blob')
+    const { blobs } = await list({ prefix: BLOB_KEY })
+    const blob = blobs.find((b) => b.pathname === BLOB_KEY)
+    if (!blob) return null
+    const res = await fetch(blob.url, {
+      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    return res.json() as Promise<AllRankings>
+  } catch {
+    return null
+  }
 }
 
 async function setBlobRankings(rankings: AllRankings): Promise<void> {
