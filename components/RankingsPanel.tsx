@@ -36,6 +36,10 @@ export default function RankingsPanel({ rankings }: RankingsPanelProps) {
     snapshot = rankings.ppa?.[ppaCategory] ?? null
   }
 
+  const snapshotKey = rankingType === 'dupr'
+    ? `dupr-${continent}-${duprCategory}`
+    : `ppa-${ppaCategory}`
+
   // Continent options — only those with data
   const continentOptions = (Object.keys(DUPR_CONTINENT_LABELS) as DuprContinent[])
     .filter((k) => rankings.dupr.continental?.[k])
@@ -98,7 +102,7 @@ export default function RankingsPanel({ rankings }: RankingsPanelProps) {
 
       {/* Rankings content */}
       {snapshot ? (
-        <div className="space-y-5">
+        <div key={snapshotKey} className="space-y-5">
           <PodiumCards players={snapshot.players} metricUnit={metricUnit} />
           <RankingList players={snapshot.players} metricUnit={metricUnit} />
         </div>

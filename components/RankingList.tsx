@@ -15,7 +15,7 @@ export default function RankingList({ players, metricUnit = '' }: RankingListPro
     <div className="border border-[#E5E7EB] rounded-[14px] overflow-hidden">
       {rest.map((player, i) => (
         <div
-          key={player.rank}
+          key={`${player.rank}-${player.name}`}
           className={[
             'flex items-center gap-4 px-5 py-4 hover:bg-[#F4F7E8] transition-colors',
             i < rest.length - 1 ? 'border-b border-[#E5E7EB]' : '',

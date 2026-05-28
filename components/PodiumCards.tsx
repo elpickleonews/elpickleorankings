@@ -18,7 +18,7 @@ export default function PodiumCards({ players, metricUnit = '' }: PodiumCardsPro
         const isFirst = i === 0
         return (
           <div
-            key={player.rank}
+            key={`${player.rank}-${player.name}`}
             className={[
               'rounded-[14px] p-6 flex flex-col gap-2 bg-white overflow-hidden border border-[#E5E7EB]',
               isFirst ? 'ring-2 ring-[#C5F230]' : '',
