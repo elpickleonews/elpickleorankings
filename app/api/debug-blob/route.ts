@@ -17,14 +17,16 @@ export async function GET() {
     }
 
     const blob = blobs[0]
-    const res = await fetch(blob.downloadUrl, { cache: 'no-store' })
+    const res = await fetch(blob.url, {
+      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+      cache: 'no-store',
+    })
     const text = await res.text()
 
     return NextResponse.json({
       status: res.status,
       blobFound: true,
       pathname: blob.pathname,
-      downloadUrl: blob.downloadUrl,
       bodyLength: text.length,
       bodyPreview: text.slice(0, 200),
     })

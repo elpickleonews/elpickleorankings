@@ -40,7 +40,10 @@ async function getBlobRankings(): Promise<AllRankings | null> {
     const { blobs } = await list({ prefix: BLOB_KEY })
     const blob = blobs.find((b) => b.pathname === BLOB_KEY)
     if (!blob) return null
-    const res = await fetch(blob.downloadUrl, { cache: 'no-store' })
+    const res = await fetch(blob.url, {
+      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+      cache: 'no-store',
+    })
     if (!res.ok) return null
     return res.json() as Promise<AllRankings>
   } catch {
