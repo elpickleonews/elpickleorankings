@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { Bricolage_Grotesque, Inter } from 'next/font/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 const bricolage = Bricolage_Grotesque({
@@ -57,9 +60,16 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+
   return (
     <html lang="es" className={`${bricolage.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+        <SpeedInsights />
+        {gaId && <GoogleAnalytics gaId={gaId} />}
+      </body>
     </html>
   )
 }
