@@ -76,7 +76,7 @@ function buildApp(): FirecrawlApp {
 async function scrapeUrl(app: FirecrawlApp, url: string): Promise<string> {
   const result = await (app.scrapeUrl as (url: string, opts: Record<string, unknown>) => Promise<any>)(url, {
     formats: ['markdown'],
-    waitFor: 4000,
+    waitFor: 6000,
   })
   const md = (result.markdown as string | undefined) ?? ''
   if (!md) throw new Error(`Firecrawl returned empty markdown for ${url}`)
@@ -125,7 +125,7 @@ function parseDuprPage(markdown: string): Partial<Record<DuprCategory, Player[]>
       const ratingStr = lines[i + 4] ?? ''
       const metric = parseFloat(ratingStr)
 
-      if (name && countryName && !isNaN(metric)) {
+      if (name && countryName && !isNaN(metric) && metric >= 1.5 && metric <= 9.0) {
         const iso = COUNTRY_ISO[countryName] ?? countryName.slice(0, 2).toUpperCase()
         players.push({
           rank,
@@ -142,7 +142,18 @@ function parseDuprPage(markdown: string): Partial<Record<DuprCategory, Player[]>
       }
     }
 
-    if (players.length > 0) result[category] = players
+    if (players.length > 0) {
+      // Sort by metric desc, deduplicate by name, reassign sequential ranks
+      players.sort((a, b) => b.metric - a.metric)
+      const seen = new Set<string>()
+      const deduped = players.filter(p => {
+        if (seen.has(p.name)) return false
+        seen.add(p.name)
+        return true
+      })
+      deduped.forEach((p, idx) => { p.rank = idx + 1 })
+      result[category] = deduped
+    }
   }
 
   return result
