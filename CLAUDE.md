@@ -158,3 +158,39 @@ Cron runs automatically every Monday at 07:00 UTC (defined in `vercel.json`).
 - Place source data in `/temp/resources/` before running workflows
 - `temp/` contents are ephemeral — not source of truth
 - Do not modify files outside the project directory without explicit instruction
+
+---
+
+## Operational Notes (invariants — do not regress)
+
+These are runtime constraints not obvious from code. Modifying them will break production.
+
+### Scraper (`lib/scraper.ts`)
+- **`waitFor: 6000`** on DUPR scrapes — DUPR is an SPA and rendering takes ~6s. Lower values cause cross-continent contamination (e.g. Chilean players showing up in North America).
+- **DUPR metric filter** `metric >= 1.5 && metric <= 9.0` — drops contaminated rows where PPA-like values (1,000+) sneak into the parsed markdown.
+- **Sort + dedupe + re-rank** after parsing each section: sort by metric desc → deduplicate by player name (keep highest) → reassign sequential ranks. Skipping any of these reintroduces duplicate ranks and out-of-order rows.
+- **Country ISO map** (`COUNTRY_ISO`) must be kept up-to-date. New countries that appear in scraped data will show the ISO code instead of the name. Add entries when a player surfaces with a missing mapping.
+
+### Data store (`lib/data-store.ts`)
+- The Vercel Blob store is **private**. Reads must use `Authorization: Bearer ${BLOB_READ_WRITE_TOKEN}` header on `blob.url`. `downloadUrl` returns 403.
+- Writes require `access: 'private'` AND `allowOverwrite: true` — otherwise repeated writes (every Monday) throw.
+
+### Cache invalidation
+- `app/page.tsx` wraps rankings in `unstable_cache` with `tags: ['rankings']` and a 7-day revalidate window.
+- The cron handler (`app/api/cron/update-rankings/route.ts`) MUST call `revalidateTag('rankings')` after writing — `revalidatePath('/')` does not invalidate `unstable_cache`.
+
+### UI (`components/RankingsPanel.tsx`)
+- The `<div>` wrapping `<PodiumCards>` + `<RankingList>` must have `key={snapshotKey}` where `snapshotKey` combines ranking type + continent + category. Without it, mobile Safari leaves stale DOM from previous tabs visible (PPA rows appearing in DUPR view).
+- `PodiumCards` and `RankingList` items use composite keys `${player.rank}-${player.name}` — not rank alone — as defense-in-depth.
+
+### Cron schedule
+- `vercel.json` cron `0 7 * * 1` = Monday 07:00 UTC = **Monday 1:00 AM Costa Rica** (UTC-6). If the timezone offset ever changes (e.g. DST elsewhere), reconfirm the UTC schedule.
+- Vercel sends an automatic email to the account owner if the cron throws. Verify the cron last-run status in Vercel → project → Cron Jobs.
+
+### Manual scrape (for testing fixes)
+Production manual trigger — only when authorized, consumes Firecrawl credits:
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://rankings.elpickleo.com/api/cron/update-rankings
+```
+Expected response: `{"ok":true,"lastUpdated":"...","continental_snapshots":24,"ppa":6}`
