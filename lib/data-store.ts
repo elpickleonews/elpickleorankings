@@ -57,5 +57,6 @@ async function setBlobRankings(rankings: AllRankings): Promise<void> {
     access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
+    allowOverwrite: true,
   })
 }
